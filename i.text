@@ -1,0 +1,54 @@
+function createLifts() {
+    for (let i = 0; i < state.lifts; i++) {
+        const lift = {
+            id: i,
+            currentFloor: 0,
+            busy: false,
+            doorsOpen: false
+        };
+        state.liftList.push(lift);
+
+        const liftDiv = document.createElement("div");
+        liftDiv.id = `lift-${i}`;
+
+        liftDiv.style.width = "60px";
+        liftDiv.style.height = "60px";
+        liftDiv.style.background = "gray";
+        liftDiv.style.display = "flex";
+        liftDiv.style.overflow = "hidden";
+        liftDiv.style.position = "absolute";
+        liftDiv.style.bottom = "0px";
+        liftDiv.style.left = `${70 * i}px`;
+        
+        const leftDoor = document.createElement("div");
+        leftDoor.className = "door left";
+        leftDoor.style.width = "50%";
+        leftDoor.style.height = "100%";
+        leftDoor.style.background = "#999";
+        leftDoor.style.transition = "transform 2.5s linear";
+             
+        const rightDoor = document.createElement("div");
+        rightDoor.className = "door right";
+        rightDoor.style.width = "50%";
+        rightDoor.style.height = "100%";
+        rightDoor.style.background = "#999";
+        rightDoor.style.transition = "transform 2.5s linear";
+
+        liftDiv.appendChild(leftDoor);
+        liftDiv.appendChild(rightDoor);
+        building.appendChild(liftDiv);
+    }
+}
+
+
+
+
+
+liftDiv.style.width = LIFT_WIDTH + "px";
+        liftDiv.style.height = "60px";
+        liftDiv.style.background = "#444";
+        liftDiv.style.position = "absolute";
+        liftDiv.style.bottom = "0px";
+        liftDiv.style.left = `${i * (LIFT_WIDTH + LIFT_GAP)}px`;
+        liftDiv.style.display = "flex";
+        liftDiv.style.overflow = "hidden";
