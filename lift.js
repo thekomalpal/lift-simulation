@@ -1,11 +1,13 @@
 console.log("lift.js loaded");
-
+const FLOOR_BORDER = 1;
 const FLOOR_HEIGHT = 80;
 const LIFT_WIDTH = 60;
 const LIFT_GAP = 10;
 const shaft = document.getElementById("shaft");
 const floorsUI = document.getElementById("floors-ui");
-const SHAFT_PADDING = 10;
+
+
+
 
 
 
@@ -21,9 +23,10 @@ const state = {
 };
 
 generateBtn.addEventListener("click", () => {
-    state.floors = Number(floorsInput.value);
-    state.lifts = Number(liftsInput.value);
-     if (floors <= 0 || lifts <= 0) {
+    const floors = Number(floorsInput.value);
+    const lifts = Number(liftsInput.value);
+
+    if (floors <= 0 || lifts <= 0) {
         alert("Please enter valid number of floors and lifts");
         return;
     }
@@ -32,14 +35,20 @@ generateBtn.addEventListener("click", () => {
     state.lifts = lifts;
     state.liftList = [];
 
-    building.style.display = "flex"; 
+    building.style.display = "flex";
 
     createBuilding();
     createLifts();
 });
 
 
+
 function createBuilding() {
+    const shaftWidth = state.lifts * (LIFT_WIDTH + LIFT_GAP);
+
+    shaft.style.width = `${shaftWidth}px`;
+    building.style.width = `${shaftWidth + 200}px`; 
+
     building.style.display = "flex";
     building.style.alignItems = "stretch";
     shaft.innerHTML = "";
@@ -92,7 +101,7 @@ function createLifts() {
         liftDiv.className = "lift";
         liftDiv.style.left = `${10 
         + i * (LIFT_WIDTH + LIFT_GAP)}px`;
-        liftDiv.style.bottom = `${SHAFT_PADDING + LIFT_VERTICAL_OFFSET}px`;
+        liftDiv.style.bottom = `-${FLOOR_BORDER}px`;
 
 
        
@@ -101,7 +110,7 @@ function createLifts() {
 
       
         const rightDoor = document.createElement("div");
-        rightDoor.className = "doo right";
+        rightDoor.className = "door right";
 
         liftDiv.appendChild(leftDoor);
         liftDiv.appendChild(rightDoor);
@@ -138,7 +147,7 @@ function moveLiftWithDoors(lift, targetFloor) {
     const floorsToMove = Math.abs(targetFloor - lift.currentFloor);
     const travelTime = floorsToMove * 2;
     liftDiv.style.transition = `bottom ${travelTime}s linear`;
-    liftDiv.style.bottom =  `${SHAFT_PADDING + targetFloor * FLOOR_HEIGHT + LIFT_VERTICAL_OFFSET}px`;
+    liftDiv.style.bottom =  `${targetFloor * FLOOR_HEIGHT - FLOOR_BORDER}px`;
     
     
     setTimeout(() => {
