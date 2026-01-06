@@ -5,11 +5,7 @@ const LIFT_WIDTH = 60;
 const LIFT_GAP = 10;
 const shaft = document.getElementById("shaft");
 const floorsUI = document.getElementById("floors-ui");
-
-
-
-
-
+const status = document.getElementById("status");
 
 const floorsInput = document.getElementById("floors");
 const liftsInput = document.getElementById("lifts");
@@ -44,6 +40,8 @@ generateBtn.addEventListener("click", () => {
 
 
 function createBuilding() {
+    shaft.innerHTML = "";
+    floorsUI.innerHTML = "";
     const shaftWidth = state.lifts * (LIFT_WIDTH + LIFT_GAP);
 
     shaft.style.width = `${shaftWidth}px`;
@@ -51,8 +49,7 @@ function createBuilding() {
 
     building.style.display = "flex";
     building.style.alignItems = "stretch";
-    shaft.innerHTML = "";
-    floorsUI.innerHTML = "";
+   
 
     shaft.style.position = "relative";
     shaft.style.height = state.floors * FLOOR_HEIGHT + "px";
@@ -68,13 +65,27 @@ function createBuilding() {
         floor.className = "floor";
         const label = document.createElement("span");
         label.textContent = `Floor ${i}`;
+        
+        const btnGroup = document.createElement("div");
 
-        const btn = document.createElement("button");
-        btn.textContent = "Call";
-        btn.onclick = () => handleLiftCall(i);
+        if (i < state.floors - 1) {
+           const upBtn = document.createElement("button");
+           upBtn.textContent = "▲";
+           upBtn.className = "floor-btn up";
+           upBtn.onclick = () => handleLiftCall(i, upBtn);
+           btnGroup.appendChild(upBtn);
+        }
+
+        if (i > 0) {
+           const downBtn = document.createElement("button");
+           downBtn.textContent = "▼";
+           downBtn.className = "floor-btn down";
+           downBtn.onclick = () => handleLiftCall(i, downBtn);
+           btnGroup.appendChild(downBtn);
+        }
 
         floor.appendChild(label);
-        floor.appendChild(btn);
+        floor.appendChild(btnGroup);
         floorsUI.appendChild(floor);
     }
 }
@@ -118,20 +129,20 @@ function createLifts() {
     }
 }
 
-
-
-function handleLiftCall(floorNumber) {
-   
+function handleLiftCall(floorNumber, buttonElement) {
     const lift = getNearestFreeLift(floorNumber);
 
-    if(!lift) {
-        alert("All lifts are busy");
+    if (!lift) {
+        showStatus("All lifts are busy","error");
         return;
     }
 
-    if (!lift.queue.includes(floorNumber)) {
-        lift.queue.push(floorNumber);
-    }
+    buttonElement.classList.add("active");
+
+    lift.queue.push({
+        floor: floorNumber,
+        button: buttonElement
+    });
 
     if (!lift.busy) {
         processLiftQueue(lift);
@@ -140,7 +151,9 @@ function handleLiftCall(floorNumber) {
 
 
 
-function moveLiftWithDoors(lift, targetFloor) {
+
+function moveLiftWithDoors(lift, request) {
+    const targetFloor = request.floor;
     lift.busy = true;
     const liftDiv = document.getElementById(`lift-${lift.id}`);
 
@@ -153,7 +166,7 @@ function moveLiftWithDoors(lift, targetFloor) {
     setTimeout(() => {
         lift.currentFloor = targetFloor;
 
-        
+        request.button.classList.remove("active");
         openDoors(lift);
 
         
@@ -196,12 +209,10 @@ function closeDoors(lift) {
 function processLiftQueue(lift) {
     if (lift.queue.length === 0) {
         lift.busy = false;
+        clearStatus();
         return;
     }
-
-
-    const nextFloor = lift.queue.shift();
-    moveLiftWithDoors(lift, nextFloor);
+     const nextFloor = lift.queue.shift();    moveLiftWithDoors(lift, nextFloor);
 }
 function getNearestFreeLift(floorNumber) {
     let nearestLift = null;
@@ -216,7 +227,19 @@ function getNearestFreeLift(floorNumber) {
             minDistance = distance;
             nearestLift = lift;
         }
-    }
+    }  
 
     return nearestLift;
+}
+
+function showStatus(message, type) {
+    status.textContent = message;
+    status.className = `status ${type}`;
+    status.style.display = "block";
+}
+
+function clearStatus() {
+    status.textContent = "";
+    status.className = "status";
+    status.style.display = "none";
 }
