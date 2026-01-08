@@ -24,11 +24,10 @@ generateBtn.addEventListener("click", () => {
     const floors = Number(floorsInput.value);
     const lifts = Number(liftsInput.value);
 
-    if (floors <= 0 || lifts <= 0 || floors === 1) {
-    alert("Invalid input: Simulation needs more than 1 floor or lift");
+    if (floors < 2 || lifts < 1) {
+    alert("Need at least 2 floors and 1 lift");
     return;
-}
-
+   }
 
     state.floors = floors;
     state.lifts = lifts;
@@ -111,7 +110,8 @@ function createLifts() {
             busy: false,
             direction: null,
             doorsOpen: false,
-            queue: []
+            queue: [],
+            activeStops: [] 
         };
         state.liftList.push(lift);
 
@@ -160,9 +160,6 @@ function handleLiftCall(floorNumber, buttonElement) {
 
 function moveLiftWithDoors(lift, request) {
     const targetFloor = request.floor;
-    lift.busy = true;
-    lift.direction =
-    request.floor > lift.currentFloor ? "up" : "down";
 
     const liftDiv = document.getElementById(`lift-${lift.id}`);
 
@@ -171,12 +168,6 @@ function moveLiftWithDoors(lift, request) {
     liftDiv.style.transition = `bottom ${travelTime}s linear`;
     const visualFloor = targetFloor - startFloor;
     liftDiv.style.bottom = `${visualFloor * FLOOR_HEIGHT - FLOOR_BORDER}px`;
-
-
-
-    if (request.floor > lift.currentFloor) lift.direction = "up";
-    else if (request.floor < lift.currentFloor) lift.direction = "down";
-    else lift.direction = null;
 
     setTimeout(() => {
         lift.currentFloor = targetFloor;
@@ -226,44 +217,47 @@ function processLiftQueue(lift) {
         lift.direction = null;
         return;
     }
+
     if (!lift.busy) {
         const next = lift.queue[0];
         lift.direction = next.floor > lift.currentFloor ? "up" : "down";
         lift.busy = true;
     }
-     const directionQueue = lift.queue.filter(req =>
-    lift.direction === "up"
-        ? req.floor > lift.currentFloor
-        : req.floor < lift.currentFloor
-);
-if (directionQueue.length === 0) {
-    lift.direction = lift.direction === "up" ? "down" : "up";
-    return processLiftQueue(lift);
+
+    let directionQueue = lift.queue.filter(req =>
+        lift.direction === "up"
+            ? req.floor >= lift.currentFloor
+            : req.floor <= lift.currentFloor
+    );
+
+    if (directionQueue.length === 0) {
+        lift.direction = lift.direction === "up" ? "down" : "up";
+        setTimeout(() => processLiftQueue(lift), 0);
+        return;
+    }
+    directionQueue.sort((a, b) =>
+        lift.direction === "up"
+            ? a.floor - b.floor
+            : b.floor - a.floor
+    );
+
+    const nextStop = directionQueue[0];
+    lift.queue = lift.queue.filter(req => req !== nextStop);
+
+    moveLiftWithDoors(lift, nextStop);
 }
-directionQueue.sort((a, b) =>
-    lift.direction === "up"
-        ? a.floor - b.floor
-        : b.floor - a.floor
-);
 
-
-const nextStop = directionQueue[0];
-lift.queue = lift.queue.filter(req => req !== nextStop);
-
-moveLiftWithDoors(lift, nextStop);
-}
 function getBestLift(floorNumber) {
+    const idleLifts = state.liftList.filter(l => !l.busy);
+    const candidates = idleLifts.length ? idleLifts : state.liftList;
+
     let bestLift = null;
-    let bestScore = Infinity;
+    let bestDistance = Infinity;
 
-    for (const lift of state.liftList) {
+    for (const lift of candidates) {
         const distance = Math.abs(lift.currentFloor - floorNumber);
-        const queuePenalty = lift.queue.length * 2;
-
-        const score = distance + queuePenalty;
-
-        if (score < bestScore || (score === bestScore && !lift.busy)) {
-            bestScore = score;
+        if (distance < bestDistance) {
+            bestDistance = distance;
             bestLift = lift;
         }
     }
