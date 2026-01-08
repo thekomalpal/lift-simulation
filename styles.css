@@ -9,33 +9,27 @@ body {
     align-items: stretch;
     gap: 20px;
     border: #333;
-    max-height: 85vh;
     overflow-y: auto;
     overflow-x: hidden;
 }
 
 #shaft {
-    position: sticky;
+    position: relative;
     bottom: 0;
     padding: 0px;
     background: #f0ebeb;
     border: 1px #ccc solid;
     box-sizing: border-box;
-    align-self: streach;
+    align-self: stretch;
 }
 
 #floors-ui {
     height: 100%;
-    max-height: 85vh;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: flex-end;
     flex-shrink: 0;
-    overflow-y: auto;
-}
-#floors-ui.btn {
-    display: flex;
-    flex-direction: row;
+    overflow-y: hidden;
 }
 
 .floor {
@@ -47,16 +41,9 @@ body {
     border-bottom: 1px solid #ccc;
     background: #fafafa;
     flex-shrink: 0;
+    box-sizing: border-box;
 }
-.floor-btn {
-    padding: 6px 10px;
-    margin: 0 4px;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 4px;
-    border: 1px solid #666;
-    background: #eee;
-}
+
 
 .floor-btn.active {
     background: #ffeb3b;
@@ -73,13 +60,6 @@ body {
     background: #eee;
     display: flex;
 }
-
-.floor-btn.active {
-    background: #ffeb3b;
-    box-shadow: 0 0 12px rgba(255, 235, 59, 0.9);
-    transform: scale(1.1);
-}
-
 
 .lift {
     width: 40px;
@@ -91,6 +71,7 @@ body {
     overflow: hidden;
     border-radius: 4px;
     border: 2px solid #333;
+    box-sizing: border-box;
 }
 
 .door {
@@ -106,36 +87,4 @@ body {
 }
 .door.right {
     border-left: 1px solid #666;
-}
-.status {
-    margin-top: 10px;
-    padding: 10px;
-    text-align: center;
-    border-radius: 4px;
-    font-size: 14px;
-    display: none;
-}
-
-.status.error {
-    display: block;
-    background: #ffdddd;
-    color: #a00;
-    border: 1px solid #a00;
-}
-
-.status.ok {
-    display: block;
-    background: #ddffdd;
-    color: #060;
-    border: 1px solid #060;
-}
-
-@media (max-width: 600px) {
-    #building {
-        flex-direction: row;
-    }
-
-    #shaft {
-        margin-bottom: 10px;
-    }
 }

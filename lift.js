@@ -3,16 +3,16 @@ console.log("lift.js loaded");
 const FLOOR_BORDER = 1;
 const FLOOR_HEIGHT = 80;
 const LIFT_WIDTH = 60;
+const LIFT_HEIGHT = 60;
 const LIFT_GAP = 10;
 const shaft = document.getElementById("shaft");
-const floorsUI = document.getElementById("floors-ui");
-const status = document.getElementById("status");
+const floorsUI = document.getElementById("floors-ui"); 
 
 const floorsInput = document.getElementById("floors");
 const liftsInput = document.getElementById("lifts");
 const generateBtn = document.getElementById("generate");
 const building = document.getElementById("building");
-const MAX_VISIBLE_FLOORS = 20;
+
 
 const state = {
     floors: 0,
@@ -24,10 +24,11 @@ generateBtn.addEventListener("click", () => {
     const floors = Number(floorsInput.value);
     const lifts = Number(liftsInput.value);
 
-    if (floors <= 0 || lifts <= 0) {
-        alert("Please enter valid number of floors and lifts");
-        return;
-    }
+    if (floors <= 0 || lifts <= 0 || floors === 1) {
+    alert("Invalid input: Simulation needs more than 1 floor or lift");
+    return;
+}
+
 
     state.floors = floors;
     state.lifts = lifts;
@@ -45,8 +46,8 @@ function createBuilding() {
     shaft.innerHTML = "";
     floorsUI.innerHTML = "";
     const shaftWidth = state.lifts * (LIFT_WIDTH + LIFT_GAP);
-    const visibleFloors = Math.min(state.floors, MAX_VISIBLE_FLOORS);
-    startFloor = Math.max(0, state.floors - visibleFloors);
+    const visibleFloors = state.floors;
+    startFloor = 0;
 
 
     shaft.style.width = `${shaftWidth}px`;
@@ -57,7 +58,6 @@ function createBuilding() {
    
 
     shaft.style.position = "relative";
-    shaft.style.height = state.floors * FLOOR_HEIGHT + "px";
     shaft.style.width = state.lifts * (LIFT_WIDTH + LIFT_GAP) + "px";
     shaft.style.height = visibleFloors * FLOOR_HEIGHT + "px";
     shaft.style.border = "2px solid black";
@@ -95,12 +95,6 @@ function createBuilding() {
 
     }
 
-       if (state.floors > MAX_VISIBLE_FLOORS) {
-    showStatus(
-                `Showing top ${MAX_VISIBLE_FLOORS} floors out of ${state.floors}`,
-                "ok"
-            );
-        }
 }
 
 
@@ -145,9 +139,7 @@ function createLifts() {
 
 function handleLiftCall(floorNumber, buttonElement) {
     const lift = getBestLift(floorNumber);
-
     if (!lift) {
-        showStatus("All lifts are busy. Request queued.", "error");
         return;
     }
 
@@ -157,7 +149,7 @@ function handleLiftCall(floorNumber, buttonElement) {
         floor: floorNumber,
         button: buttonElement
     });
-
+    console.log("Lift queue now:", lift.queue);
     if (!lift.busy) {
         processLiftQueue(lift);
     }
@@ -178,15 +170,19 @@ function moveLiftWithDoors(lift, request) {
     const travelTime = floorsToMove * 2;
     liftDiv.style.transition = `bottom ${travelTime}s linear`;
     const visualFloor = targetFloor - startFloor;
-    liftDiv.style.bottom = `${visualFloor * FLOOR_HEIGHT - FLOOR_BORDER}px`;
+    const CENTER_OFFSET = (FLOOR_HEIGHT - LIFT_HEIGHT) / 2;
+    liftDiv.style.bottom = `${visualFloor * FLOOR_HEIGHT + CENTER_OFFSET - FLOOR_BORDER}px`;
 
-    
-    
+
+
+    if (request.floor > lift.currentFloor) lift.direction = "up";
+    else if (request.floor < lift.currentFloor) lift.direction = "down";
+    else lift.direction = null;
+
     setTimeout(() => {
         lift.currentFloor = targetFloor;
-
-        request.button.classList.remove("active");
         openDoors(lift);
+        request.button.classList.remove("active");
 
         
         setTimeout(() => {
@@ -229,13 +225,18 @@ function processLiftQueue(lift) {
     if (lift.queue.length === 0) {
         lift.busy = false;
         lift.direction = null;
-        clearStatus();
         return;
     }
 
      lift.queue.sort((a, b) => {
-        const dirA = a.floor > lift.currentFloor ? "up" : "down";
-        const dirB = b.floor > lift.currentFloor ? "up" : "down";
+       const dirA =
+        a.floor === lift.currentFloor ? null :
+        a.floor > lift.currentFloor ? "up" : "down";
+
+       const dirB =
+        b.floor === lift.currentFloor ? null :
+        b.floor > lift.currentFloor ? "up" : "down";
+
 
         if (dirA === lift.direction && dirB !== lift.direction) return -1;
         if (dirA !== lift.direction && dirB === lift.direction) return 1;
@@ -244,7 +245,8 @@ function processLiftQueue(lift) {
              - Math.abs(b.floor - lift.currentFloor);
     });
 
-     const nextFloor = lift.queue.shift();    moveLiftWithDoors(lift, nextFloor);
+     const nextFloor = lift.queue.shift();    
+     moveLiftWithDoors(lift, nextFloor);
 }
 function getBestLift(floorNumber) {
     let bestLift = null;
@@ -263,17 +265,4 @@ function getBestLift(floorNumber) {
     }
 
     return bestLift;
-}
-
-
-function showStatus(message, type) {
-    status.textContent = message;
-    status.className = `status ${type}`;
-    status.style.display = "block";
-}
-
-function clearStatus() {
-    status.textContent = "";
-    status.className = "status";
-    status.style.display = "none";
 }
