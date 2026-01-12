@@ -7,26 +7,30 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Lift Simulation</h1>
-    <div>
-        <label>
-            Number of Floors:
-            <input type="number" id="floors" min="1">
-        </label>
-        <br><br>
-        <label>
-            Number of Lifts:
-            <input type="number" id="lifts" min="1">
-        </label>
-        <br><br>
-         <button id="generate">Generate Building</button>
-         <br><br><br>
-    </div>
-    <div id="building">
-        <div id="floors-ui"></div>
-        <div id="shaft"></div>
-    </div>
 
-    <script src="lift.js" defer></script>
+<h1>Lift Simulation</h1>
+
+<div>
+    <label>
+        Number of Floors:
+        <input type="number" id="numFloors" min="2">
+    </label>
+    <br><br>
+    <label>
+        Number of Lifts:
+        <input type="number" id="numLifts" min="1">
+    </label>
+    <br><br>
+    <button id="generateBtn">Generate Building</button>
+    <p id="error-message" class="error hidden" style="color: red;"></p>
+</div>
+
+<br>
+
+<div id="simulation-root" class="hidden">
+    <div id="simulation-container"></div>
+</div>
+
+<script src="lift.js"></script>
 </body>
 </html>
