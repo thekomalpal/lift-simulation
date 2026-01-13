@@ -13,11 +13,6 @@ body {
     padding-top: 20px;
     overflow-x: auto;
 }
-#simulation-container,
-.shafts-container {
-    scroll-behavior: smooth;
-}
-
 /* Floors Column */
 .floors-column {
     display: flex;
@@ -65,7 +60,6 @@ body {
     position: relative;
     border: 1px solid #ddd;
     background: #f9f9f9;
-    max-width: 100%;
 }
 
 .shaft {
@@ -146,63 +140,26 @@ body {
 .lift.doors-open .door.right {
     transform: translateX(100%);
 }
-
-@media (max-width: 768px) {
-
-    body {
-        padding: 10px;
-        font-size: 14px;
+@media (max-width: 600px) {
+    :root {
+        --floor-height: 70px;
+        --shaft-width: 60px;
+        --lift-width: 45px;
+        --lift-height: 60px;
+        --button-padding: 8px 12px;
     }
 
     #simulation-container {
         flex-direction: column;
         gap: 20px;
-        overflow-x: auto;
-    }
-
-    .floor {
-        height: 70px;
-    }
-
-    .floor-label {
-        width: 25px;
-        font-size: 0.9em;
     }
 
     .controls {
-        gap: 8px;
+        flex-wrap: wrap;
     }
 
     .direction-btn {
-        padding: 8px 12px;
         font-size: 14px;
-        min-width: 48px; 
-    }
-
-   
-    .shafts-container {
-        overflow-x: auto;
-        padding-bottom: 10px;
-    }
-
-    .shaft {
-        width: 65px;
-    }
-
-    
-    .lift {
-        width: 50px;
-        height: 65px;
-        left: 7px;
-        transition: bottom 1.5s linear;
-    }
-
-    .lift-status-box {
-        font-size: 0.7em;
-        top: -20px;
-    }
-
-    .door {
-        transition: transform 2s ease-in-out;
     }
 }
+
