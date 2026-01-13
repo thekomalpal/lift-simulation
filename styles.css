@@ -1,17 +1,3 @@
-:root {
-  --floor-height: 100px;
-  --lift-width: 60px;
-  --lift-height-offset: 10px;
-  --shaft-padding: 10px;
-}
-
-@media (max-width: 600px) {
-  :root {
-    --floor-height: 80px;
-    --lift-width: 50px;
-  }
-}
-
 body {
     font-family: Arial, sans-serif;
     padding: 20px;
@@ -27,29 +13,21 @@ body {
     padding-top: 20px;
     overflow-x: auto;
 }
-
+/* Floors Column */
 .floors-column {
     display: flex;
     flex-direction: column-reverse;
-    min-width: 120px;
-    border-right: 3px solid #444;
-    position: sticky;
-    left: 0;
-    background: white;
-    z-index: 20;
+    /* Floor 0 at bottom */
 }
 
 .floor {
-  height: var(--floor-height);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #ccc;
-  box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.6);
-  padding-right: 8px;
+    height: 100px;
+    /* Matched with JS constant */
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    box-sizing: border-box;
 }
-
 
 .floor-label {
     width: 30px;
@@ -59,7 +37,6 @@ body {
 
 .controls {
     display: flex;
-    flex-direction: column;
     gap: 5px;
 }
 
@@ -69,15 +46,15 @@ body {
     border: 1px solid #999;
     background: #fff;
     border-radius: 4px;
-    font-size: 12px;
 }
 
 .direction-btn.active {
     background-color: #fdd835;
+    /* Yellow highlight */
     border-color: #fbc02d;
-    font-weight: bold;
 }
 
+/* Shafts */
 .shafts-container {
     display: flex;
     position: relative;
@@ -86,68 +63,76 @@ body {
 }
 
 .shaft {
-  width: calc(var(--lift-width) + var(--shaft-padding));
-  height: 100%;
-  background: #f1f5f9;
-  border-left: 1px solid #aaa;
-  border-right: 1px solid #aaa;
-  position: relative;
-  margin: 0 4px;
+    width: 80px;
+    height: 100%;
+    border-right: 1px solid #ddd;
+    position: relative;
+    box-sizing: border-box;
 }
-
 
 .shaft:last-child {
     border-right: none;
 }
 
+/* Lift */
 .lift {
-  width: var(--lift-width);
-  height: calc(var(--floor-height) - var(--lift-height-offset));
-  background: #cbd5e1;
-  border: 2px solid #333;
-  border-radius: 4px;
-  position: absolute;
-  left: 5px;
-  bottom: 5px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: bottom 2s linear;
-  z-index: 10;
+    width: 60px;
+    height: 80px;
+    /* Slightly smaller than floor to fit */
+    background: #333;
+    position: absolute;
+    left: 10px;
+    /* Center in 80px shaft */
+    bottom: 0px;
+    transition: bottom 2s linear;
+    /* Should match JS TIME_PER_FLOOR_MS */
+    border: 2px solid #000;
+    box-sizing: border-box;
+    overflow: hidden;
+    /* For doors */
 }
-
 
 .lift.moving {
     background: #444;
+    /* darker when moving */
 }
 
 .lift-status-box {
-  height: 24px;
-  width: 100%;
-  background: #111;
-  color: #ef4444;
-  font-family: monospace;
-  font-size: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid #333;
-  flex-shrink: 0;
+    position: absolute;
+    top: -25px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8em;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 0;
+    border-radius: 4px;
 }
 
-.lift-status-box {
-  height: 24px;
-  width: 100%;
-  background: #111;
-  color: #ef4444;
-  font-family: monospace;
-  font-size: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid #333;
-  flex-shrink: 0;
+/* Doors */
+.door {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: #ccc;
+    transition: transform 2.5s ease-in-out;
+    /* Match JS time */
+    z-index: 2;
 }
+
+.door.left {
+    left: 0;
+    border-right: 1px solid #999;
+    transform-origin: left;
+}
+
+.door.right {
+    right: 0;
+    border-left: 1px solid #999;
+    transform-origin: right;
+}
+
 .lift.doors-open .door.left {
     transform: translateX(-100%);
 }
@@ -155,5 +140,3 @@ body {
 .lift.doors-open .door.right {
     transform: translateX(100%);
 }
-
-
