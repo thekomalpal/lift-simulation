@@ -141,25 +141,9 @@ body {
     transform: translateX(100%);
 }
 @media (max-width: 600px) {
-    :root {
-        --floor-height: 70px;
-        --shaft-width: 60px;
-        --lift-width: 45px;
-        --lift-height: 60px;
-        --button-padding: 8px 12px;
-    }
-
-    #simulation-container {
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .controls {
-        flex-wrap: wrap;
-    }
-
-    .direction-btn {
-        font-size: 14px;
-    }
+  :root {
+    --floor-height: 80px;
+    --lift-width: 50px;
+  }
 }
 
