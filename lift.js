@@ -1,17 +1,13 @@
-// --- Constants ---
 const TIME_PER_FLOOR_MS = 2000;
 const TIME_OPEN_DOOR_MS = 2500;
 const TIME_CLOSE_DOOR_MS = 2500;
 const TIME_WAIT_MS = 1000;
 
-// Visual configuration
 let FLOOR_HEIGHT = 100;
 
-// --- State ---
 let lifts = [];
 let floorCount = 0;
 
-// --- Helper ---
 function formatFloor(f) {
   return f === 0 ? 'G' : f.toString();
 }
@@ -21,8 +17,6 @@ function isButtonActive(floor, dir) {
   return btn ? btn.classList.contains('active') : false;
 }
 
-// --- Classes ---
-
 class Lift {
   constructor(id) {
     this.id = id;
@@ -31,7 +25,7 @@ class Lift {
     this.isBusy = false;
     this.element = null;
     this.statusElement = null;
-    this.direction = null; // 'UP' | 'DOWN' | null
+    this.direction = null;
     this.nextStop = null;
   }
 
@@ -49,7 +43,6 @@ class Lift {
   updateVisualPosition(durationMs) {
     if (this.element) {
       this.element.style.transition = `bottom ${durationMs}ms linear`;
-      // +5 aligns with CSS bottom: 5px
       this.element.style.bottom = `${(this.currentFloor * FLOOR_HEIGHT) + 5}px`;
     }
   }
@@ -60,30 +53,20 @@ class Lift {
     }
   }
 
-  // Decides if the lift should actually stop at the current floor
-  // based on its direction and the active buttons.
   checkShouldStop() {
-    // If not in stops, obviously don't stop.
     if (!this.stops.has(this.currentFloor)) return false;
 
-    // If we are IDLE or have no direction yet, we stop.
     if (this.direction === null) return true;
 
-    // Directional Logic
     if (this.direction === 'UP') {
       const upActive = isButtonActive(this.currentFloor, 'UP');
-      // Always stop for a request in our direction
       if (upActive) return true;
 
-      // Check for reversal
       const hasHigherStops = Array.from(this.stops).some(f => f > this.currentFloor);
       if (hasHigherStops) {
-        // We have higher stops, so we are continuing UP.
-        // If there is NO up request, we skip this floor (assuming the stop was added for a DOWN request).
         return false;
       }
 
-      // No higher stops -> Reversal -> Stop here.
       return true;
     }
 
@@ -105,14 +88,12 @@ class Lift {
   async process() {
     if (this.isBusy) return;
 
-    // 1. Check if we are at a stop AND should stop
     if (this.checkShouldStop()) {
       await this.handleDoorSequence();
-      this.process(); // Re-evaluate logic after sequence
+      this.process();
       return;
     }
 
-    // 2. Determine Next Target
     if (this.stops.size === 0) {
       this.direction = null;
       this.nextStop = null;
@@ -126,13 +107,11 @@ class Lift {
     let targetFloor = null;
     const requestedFloors = Array.from(this.stops).sort((a, b) => a - b);
 
-    // Maintain momentum logic
     if (this.direction === 'UP') {
       const above = requestedFloors.find(f => f > this.currentFloor);
       if (above !== undefined) {
         targetFloor = above;
       } else {
-        // Reversal
         this.direction = 'DOWN';
         const below = requestedFloors.filter(f => f < this.currentFloor);
         if (below.length > 0) targetFloor = below[below.length - 1];
@@ -142,13 +121,11 @@ class Lift {
       if (below.length > 0) {
         targetFloor = below[0];
       } else {
-        // Reversal
         this.direction = 'UP';
         const above = requestedFloors.filter(f => f > this.currentFloor);
         if (above.length > 0) targetFloor = above[0];
       }
     } else {
-      // IDLE -> Pick nearest
       const sortedByDist = requestedFloors.sort((a, b) => Math.abs(a - this.currentFloor) - Math.abs(b - this.currentFloor));
       targetFloor = sortedByDist[0];
       this.direction = targetFloor > this.currentFloor ? 'UP' : 'DOWN';
@@ -158,8 +135,6 @@ class Lift {
       this.nextStop = targetFloor;
       await this.moveOneStep();
     } else if (targetFloor === this.currentFloor) {
-      // Failsafe: If logic brought us here but checkShouldStop failed earlier?
-      // It might happen if we are assigned a job while idle at the floor.
       await this.handleDoorSequence();
       this.process();
     }
@@ -178,7 +153,6 @@ class Lift {
       `);
     }
 
-    // Physical Move
     if (this.direction === 'UP') this.currentFloor++;
     else if (this.direction === 'DOWN') this.currentFloor--;
 
@@ -201,13 +175,9 @@ class Lift {
     let servicedUp = false;
     let servicedDown = false;
 
-    // Logic: Decide which request(s) we are servicing.
-    // AND Check for Reversal to prevent double-opening.
-
     if (currentDir === 'UP') {
       if (upActive) servicedUp = true;
 
-      // CHECK REVERSAL: If no higher stops, we can also service DOWN.
       const hasHigherStops = Array.from(this.stops).some(f => f > floor);
       if (!hasHigherStops) {
         if (downActive) servicedDown = true;
@@ -215,29 +185,46 @@ class Lift {
     } else if (currentDir === 'DOWN') {
       if (downActive) servicedDown = true;
 
-      // CHECK REVERSAL: If no lower stops, we can also service UP.
       const hasLowerStops = Array.from(this.stops).some(f => f < floor);
       if (!hasLowerStops) {
         if (upActive) servicedUp = true;
       }
     } else {
-      // IDLE
-      if (upActive) servicedUp = true;
-      if (downActive) servicedDown = true;
+      const remainingStops = Array.from(this.stops).filter(f => f !== floor);
+      
+      if (remainingStops.length > 0) {
+        const hasHigher = remainingStops.some(f => f > floor);
+        const hasLower = remainingStops.some(f => f < floor);
+        
+        if (hasHigher && !hasLower) {
+          if (upActive) servicedUp = true;
+        } else if (hasLower && !hasHigher) {
+          if (downActive) servicedDown = true;
+        } else if (hasHigher && hasLower) {
+          const nextTarget = remainingStops.sort((a, b) => Math.abs(a - floor) - Math.abs(b - floor))[0];
+          if (nextTarget > floor && upActive) {
+            servicedUp = true;
+          } else if (nextTarget < floor && downActive) {
+            servicedDown = true;
+          }
+        }
+      } else {
+        if (upActive && !downActive) servicedUp = true;
+        else if (downActive && !upActive) servicedDown = true;
+        else if (upActive && downActive) {
+          servicedUp = true;
+        }
+      }
     }
 
-    // Clear buttons
     if (servicedUp) updateButtonState(floor, 'UP', false);
     if (servicedDown) updateButtonState(floor, 'DOWN', false);
 
-    // Remove stop for this floor
     this.stops.delete(this.currentFloor);
 
-    // If we did NOT service a button that is active, we must ensure it gets handled.
     if (upActive && !servicedUp) assignLift(floor, 'UP');
     if (downActive && !servicedDown) assignLift(floor, 'DOWN');
 
-    // Animation
     if (this.element) {
       this.element.classList.remove('moving');
       this.element.classList.add('doors-open');
@@ -257,7 +244,6 @@ class Lift {
   }
 }
 
-// --- DOM & Helpers ---
 const numFloorsInput = document.getElementById('numFloors');
 const numLiftsInput = document.getElementById('numLifts');
 const generateBtn = document.getElementById('generateBtn');
@@ -265,12 +251,32 @@ const errorMessage = document.getElementById('error-message');
 const simRoot = document.getElementById('simulation-root');
 const simContainer = document.getElementById('simulation-container');
 
-// Helper to update global FLOOR_HEIGHT based on screen size
 function updateFloorHeight() {
-  if (window.innerWidth < 600) FLOOR_HEIGHT = 80;
-  else FLOOR_HEIGHT = 100;
+  if (window.innerWidth < 480) {
+    FLOOR_HEIGHT = 70;
+  } else if (window.innerWidth < 768) {
+    FLOOR_HEIGHT = 80;
+  } else {
+    FLOOR_HEIGHT = 100;
+  }
 
-  // Update existing lifts if any
+  const allFloors = document.querySelectorAll('.floor');
+  allFloors.forEach(floor => {
+    floor.style.height = `${FLOOR_HEIGHT}px`;
+  });
+
+  const allFloorLines = document.querySelectorAll('.floor-line');
+  allFloorLines.forEach((line, index) => {
+    const floorIndex = Math.floor(index / lifts.length);
+    line.style.bottom = `${floorIndex * FLOOR_HEIGHT}px`;
+    line.style.height = `${FLOOR_HEIGHT}px`;
+  });
+
+  const shaftsContainer = document.querySelector('.shafts-container');
+  if (shaftsContainer && floorCount > 0) {
+    shaftsContainer.style.height = `${floorCount * FLOOR_HEIGHT}px`;
+  }
+
   lifts.forEach(lift => lift.updateVisualPosition(0));
 }
 
@@ -280,12 +286,15 @@ generateBtn.addEventListener('click', () => {
   const f = parseInt(numFloorsInput.value);
   const l = parseInt(numLiftsInput.value);
 
-  // Validation Logic
   let errorText = "";
   if (isNaN(f) || f < 2) {
-    errorText = "Number of floors must be greater than 1.";
+    errorText = "Number of floors must be at least 2.";
+  } else if (f > 20) {
+    errorText = "Number of floors must not exceed 20.";
   } else if (isNaN(l) || l < 1) {
-    errorText = "Number of lifts must be greater than 0.";
+    errorText = "Number of lifts must be at least 1.";
+  } else if (l > 10) {
+    errorText = "Number of lifts must not exceed 10.";
   }
 
   if (errorText) {
@@ -312,15 +321,15 @@ function initSimulation(floors, liftCount) {
   floorCount = floors;
   simRoot.classList.remove('hidden');
 
-  updateFloorHeight(); // Set initial height
+  updateFloorHeight();
 
-  // 1. Floors Column
   const floorsCol = document.createElement('div');
   floorsCol.className = 'floors-column';
 
   for (let i = 0; i < floors; i++) {
     const floorDiv = document.createElement('div');
     floorDiv.className = 'floor';
+    floorDiv.style.height = `${FLOOR_HEIGHT}px`;
 
     let buttonsHtml = '';
     const upBtn = `<button id="btn-UP-${i}" class="direction-btn" onclick="window.callLift(${i}, 'UP')">▲</button>`;
@@ -344,7 +353,6 @@ function initSimulation(floors, liftCount) {
   }
   simContainer.appendChild(floorsCol);
 
-  // 2. Shafts
   const shaftsContainer = document.createElement('div');
   shaftsContainer.className = 'shafts-container';
   shaftsContainer.style.height = `${floors * FLOOR_HEIGHT}px`;
@@ -352,6 +360,14 @@ function initSimulation(floors, liftCount) {
   for (let i = 0; i < liftCount; i++) {
     const shaft = document.createElement('div');
     shaft.className = 'shaft';
+
+    for (let f = 0; f < floors; f++) {
+      const floorLine = document.createElement('div');
+      floorLine.className = 'floor-line';
+      floorLine.style.bottom = `${f * FLOOR_HEIGHT}px`;
+      floorLine.style.height = `${FLOOR_HEIGHT}px`;
+      shaft.appendChild(floorLine);
+    }
 
     const liftEl = document.createElement('div');
     liftEl.className = 'lift';
@@ -374,7 +390,6 @@ function initSimulation(floors, liftCount) {
   simContainer.appendChild(shaftsContainer);
 }
 
-// Global scope
 window.callLift = (floorIndex, direction) => {
   const btn = document.getElementById(`btn-${direction}-${floorIndex}`);
   if (btn && btn.classList.contains('active')) return;
@@ -392,17 +407,15 @@ function assignLift(floor, direction) {
     const dist = Math.abs(lift.currentFloor - floor);
 
     if (lift.direction === null) {
-      // IDLE
       cost = dist;
     } else if (lift.direction === direction) {
-      // SAME DIRECTION
       if (direction === 'UP') {
         if (lift.currentFloor <= floor) {
           cost = dist;
         } else {
-          cost = dist + (floorCount * 2); // Penalty for passed
+          cost = dist + (floorCount * 2);
         }
-      } else { // DOWN
+      } else {
         if (lift.currentFloor >= floor) {
           cost = dist;
         } else {
@@ -410,11 +423,9 @@ function assignLift(floor, direction) {
         }
       }
     } else {
-      // OPPOSITE DIRECTION
       cost = dist + floorCount;
     }
 
-    // Minor load balancing
     if (cost < Infinity) {
       cost += (lift.stops.size * 0.5);
     }
@@ -426,7 +437,6 @@ function assignLift(floor, direction) {
   }
 
   if (!bestLift) {
-    // Fallback: nearest regardless of direction
     bestLift = lifts.sort((a, b) => Math.abs(a.currentFloor - floor) - Math.abs(b.currentFloor - floor))[0];
   }
 
