@@ -56,10 +56,17 @@ class Lift {
   checkShouldStop() {
     if (!this.stops.has(this.currentFloor)) return false;
 
+    const upActive = isButtonActive(this.currentFloor, 'UP');
+    const downActive = isButtonActive(this.currentFloor, 'DOWN');
+
+    if (!upActive && !downActive) {
+      this.stops.delete(this.currentFloor);
+      return false;
+    }
+
     if (this.direction === null) return true;
 
     if (this.direction === 'UP') {
-      const upActive = isButtonActive(this.currentFloor, 'UP');
       if (upActive) return true;
 
       const hasHigherStops = Array.from(this.stops).some(f => f > this.currentFloor);
@@ -71,7 +78,6 @@ class Lift {
     }
 
     if (this.direction === 'DOWN') {
-      const downActive = isButtonActive(this.currentFloor, 'DOWN');
       if (downActive) return true;
 
       const hasLowerStops = Array.from(this.stops).some(f => f < this.currentFloor);
@@ -87,6 +93,12 @@ class Lift {
 
   async process() {
     if (this.isBusy) return;
+
+    const validStops = Array.from(this.stops).filter(floor => {
+      return isButtonActive(floor, 'UP') || isButtonActive(floor, 'DOWN');
+    });
+    
+    this.stops = new Set(validStops);
 
     if (this.checkShouldStop()) {
       await this.handleDoorSequence();
@@ -179,15 +191,15 @@ class Lift {
       if (upActive) servicedUp = true;
 
       const hasHigherStops = Array.from(this.stops).some(f => f > floor);
-      if (!hasHigherStops) {
-        if (downActive) servicedDown = true;
+      if (!hasHigherStops && downActive && !upActive) {
+        servicedDown = true;
       }
     } else if (currentDir === 'DOWN') {
       if (downActive) servicedDown = true;
 
       const hasLowerStops = Array.from(this.stops).some(f => f < floor);
-      if (!hasLowerStops) {
-        if (upActive) servicedUp = true;
+      if (!hasLowerStops && upActive && !downActive) {
+        servicedUp = true;
       }
     } else {
       const remainingStops = Array.from(this.stops).filter(f => f !== floor);
@@ -209,9 +221,11 @@ class Lift {
           }
         }
       } else {
-        if (upActive && !downActive) servicedUp = true;
-        else if (downActive && !upActive) servicedDown = true;
-        else if (upActive && downActive) {
+        if (upActive && !downActive) {
+          servicedUp = true;
+        } else if (downActive && !upActive) {
+          servicedDown = true;
+        } else if (upActive && downActive) {
           servicedUp = true;
         }
       }
@@ -222,8 +236,12 @@ class Lift {
 
     this.stops.delete(this.currentFloor);
 
-    if (upActive && !servicedUp) assignLift(floor, 'UP');
-    if (downActive && !servicedDown) assignLift(floor, 'DOWN');
+    if (upActive && !servicedUp) {
+      assignLift(floor, 'UP');
+    }
+    if (downActive && !servicedDown) {
+      assignLift(floor, 'DOWN');
+    }
 
     if (this.element) {
       this.element.classList.remove('moving');
@@ -399,6 +417,10 @@ window.callLift = (floorIndex, direction) => {
 };
 
 function assignLift(floor, direction) {
+  if (!isButtonActive(floor, direction)) {
+    return;
+  }
+
   let bestLift = null;
   let minCost = Infinity;
 
