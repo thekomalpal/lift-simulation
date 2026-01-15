@@ -1,147 +1,285 @@
-body {
-    font-family: Arial, sans-serif;
-    padding: 10px;
+* {
     margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
-* {
-    box-sizing: border-box;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    color: rgb(0, 0, 0);
+    margin-bottom: 30px;
+    font-size: 2.5em;
+}
+
+.input-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 1em;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+#generateBtn {
+    width: 100%;
+    padding: 15px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 10px;
+}
+
+#generateBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+#generateBtn:active {
+    transform: translateY(0);
+}
+
+.error {
+    color: #e74c3c;
+    margin-top: 15px;
+    padding: 10px;
+    background: #fadbd8;
+    border-radius: 5px;
+    font-size: 0.95em;
 }
 
 .hidden {
     display: none;
 }
 
+#simulation-root {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
 #simulation-container {
     display: flex;
     gap: 20px;
-    padding-top: 20px;
+    padding: 20px 0;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Floors Column */
 .floors-column {
     display: flex;
     flex-direction: column-reverse;
     flex-shrink: 0;
+    min-width: 120px;
 }
 
 .floor {
-    height: 80px;
+    height: 100px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #ccc;
-    box-sizing: border-box;
-    padding: 5px;
+    justify-content: flex-start;
+    border-bottom: 2px solid #e0e0e0;
+    padding: 0 10px;
+    gap: 10px;
+}
+
+.floor:first-child {
+    border-bottom: 3px solid #333;
 }
 
 .floor-label {
-    width: 25px;
+    width: 35px;
     font-weight: bold;
-    margin-right: 8px;
-    font-size: 0.9em;
+    font-size: 1.2em;
+    color: #333;
+    text-align: center;
+    flex-shrink: 0;
 }
 
 .controls {
     display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: nowrap;
+    align-items: center;
 }
 
 .direction-btn {
-    padding: 8px 12px;
+    width: 50px;
+    height: 50px;
     cursor: pointer;
-    border: 1px solid #999;
+    border: 2px solid #999;
     background: #fff;
-    border-radius: 4px;
-    font-size: 0.85em;
-    touch-action: manipulation; /* Prevents zoom on double-tap */
-    min-width: 44px; /* Apple's recommended touch target size */
-    min-height: 44px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    transition: all 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.direction-btn:hover {
+    background: #f0f0f0;
+    transform: scale(1.05);
+}
+
+.direction-btn:active {
+    transform: scale(0.95);
 }
 
 .direction-btn.active {
     background-color: #fdd835;
-    border-color: #fbc02d;
+    border-color: #f9a825;
+    box-shadow: 0 0 15px rgba(253, 216, 53, 0.6);
+    animation: pulse 1s infinite;
 }
 
-/* Shafts */
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(253, 216, 53, 0.6);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(253, 216, 53, 0.8);
+    }
+}
+
 .shafts-container {
     display: flex;
     position: relative;
-    border: 1px solid #ddd;
-    background: #f9f9f9;
+    background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%);
     flex-shrink: 0;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 .shaft {
-    width: 70px;
+    width: 80px;
     height: 100%;
-    border-right: 1px solid #ddd;
+    border-right: 2px dashed #bbb;
     position: relative;
-    box-sizing: border-box;
 }
 
 .shaft:last-child {
     border-right: none;
 }
 
+.floor-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-bottom: 2px solid #ccc;
+    box-sizing: border-box;
+    pointer-events: none;
+}
+
+.floor-line:first-child {
+    border-bottom: 3px solid #666;
+}
+
 .lift {
-    width: 50px;
-    height: 65px;
-    background: #333;
+    width: 60px;
+    height: 80px;
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
     position: absolute;
     left: 10px;
-    bottom: 0px;
-    transition: bottom 2s linear;
-    border: 2px solid #000;
+    bottom: 5px;
+    border: 3px solid #1a252f;
+    border-radius: 8px;
     box-sizing: border-box;
     overflow: hidden;
 }
 
 .lift.moving {
-    background: #444;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.5);
 }
 
 .lift-status-box {
     position: absolute;
-    top: -22px;
+    top: -28px;
     left: 0;
     width: 100%;
     text-align: center;
-    font-size: 0.7em;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 2px 0;
-    border-radius: 3px;
+    font-size: 0.85em;
+    background: rgba(52, 73, 94, 0.95);
+    color: white;
+    padding: 4px 2px;
+    border-radius: 5px;
+    font-weight: bold;
     white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Doors */
 .door {
     position: absolute;
     top: 0;
     width: 50%;
     height: 100%;
-    background: #ccc;
+    background: linear-gradient(90deg, #95a5a6 0%, #7f8c8d 100%);
     transition: transform 2.5s ease-in-out;
     z-index: 2;
 }
 
 .door.left {
     left: 0;
-    border-right: 1px solid #999;
-    transform-origin: left;
+    border-right: 2px solid #34495e;
 }
 
 .door.right {
     right: 0;
-    border-left: 1px solid #999;
-    transform-origin: right;
+    border-left: 2px solid #34495e;
 }
 
 .lift.doors-open .door.left {
@@ -152,36 +290,119 @@ body {
     transform: translateX(100%);
 }
 
-/* Mobile Specific Styles */
+#simulation-container::-webkit-scrollbar {
+    height: 10px;
+}
+
+#simulation-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+#simulation-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+#simulation-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 @media (max-width: 768px) {
     body {
-        padding: 5px;
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+        margin-bottom: 20px;
+    }
+
+    .input-section {
+        padding: 20px;
+    }
+
+    .floor {
+        height: 80px;
+    }
+
+    .floor-label {
+        width: 30px;
+        font-size: 1em;
+    }
+
+    .direction-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1em;
+    }
+
+    .shaft {
+        width: 70px;
+    }
+
+    .lift {
+        width: 52px;
+        height: 65px;
+        left: 9px;
+    }
+
+    .lift-status-box {
+        font-size: 0.75em;
+        top: -26px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5em;
+    }
+
+    .input-section {
+        padding: 15px;
+    }
+
+    .input-group input {
+        padding: 10px;
+    }
+
+    #generateBtn {
+        padding: 12px;
+        font-size: 1em;
+    }
+
+    #simulation-root {
+        padding: 10px;
     }
 
     #simulation-container {
         gap: 15px;
-        padding-top: 10px;
+        padding: 10px 0;
+    }
+
+    .floors-column {
+        min-width: 100px;
     }
 
     .floor {
         height: 70px;
+        padding: 0 5px;
+        gap: 5px;
     }
 
     .floor-label {
-        width: 20px;
-        margin-right: 5px;
-        font-size: 0.85em;
+        width: 25px;
+        font-size: 0.9em;
     }
 
     .controls {
-        gap: 3px;
+        gap: 5px;
     }
 
     .direction-btn {
-        padding: 6px 10px;
-        font-size: 0.8em;
-        min-width: 40px;
-        min-height: 40px;
+        width: 40px;
+        height: 40px;
+        font-size: 1em;
     }
 
     .shaft {
@@ -195,41 +416,26 @@ body {
     }
 
     .lift-status-box {
-        font-size: 0.65em;
-        top: -20px;
+        font-size: 0.7em;
+        top: -24px;
+        padding: 3px 2px;
     }
 }
 
-/* Extra Small Mobile Devices */
-@media (max-width: 480px) {
-    body {
-        padding: 5px;
-    }
-
-    #simulation-container {
-        gap: 10px;
-        flex-direction: column;
-    }
-
+@media (max-width: 360px) {
     .floor {
         height: 60px;
     }
 
     .floor-label {
-        width: 18px;
+        width: 20px;
         font-size: 0.8em;
     }
 
     .direction-btn {
-        padding: 5px 8px;
-        font-size: 0.75em;
-        min-width: 38px;
-        min-height: 38px;
-    }
-
-    .shafts-container {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        width: 36px;
+        height: 36px;
+        font-size: 0.95em;
     }
 
     .shaft {
@@ -243,45 +449,7 @@ body {
     }
 
     .lift-status-box {
-        font-size: 0.6em;
-        top: -18px;
+        font-size: 0.65em;
+        top: -22px;
     }
-}
-
-/* Landscape orientation on mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-    .floor {
-        height: 65px;
-    }
-
-    #simulation-container {
-        flex-direction: row;
-    }
-}
-
-/* Prevent text selection on buttons for better mobile UX */
-.direction-btn {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Improve scrollbar on mobile */
-#simulation-container::-webkit-scrollbar {
-    height: 8px;
-}
-
-#simulation-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-#simulation-container::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-}
-
-#simulation-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
 }
