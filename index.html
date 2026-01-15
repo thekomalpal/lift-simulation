@@ -2,33 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Lift Simulation</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<h1>Lift Simulation</h1>
+<div class="container">
+    <h1>Lift Simulation</h1>
 
-<div>
-    <label>
-        Number of Floors:
-        <input type="number" id="numFloors" min="2">
-    </label>
-    <br><br>
-    <label>
-        Number of Lifts:
-        <input type="number" id="numLifts" min="1">
-    </label>
-    <br><br>
-    <button id="generateBtn">Generate Building</button>
-    <p id="error-message" class="error hidden" style="color: red;"></p>
-</div>
+    <div class="input-section">
+        <div class="input-group">
+            <label for="numFloors">Number of Floors:</label>
+            <input type="number" id="numFloors" min="2" placeholder="Enter floors">
+        </div>
+        
+        <div class="input-group">
+            <label for="numLifts">Number of Lifts:</label>
+            <input type="number" id="numLifts" min="1" placeholder="Enter lifts">
+        </div>
+        
+        <button id="generateBtn">Generate Building</button>
+        <p id="error-message" class="error hidden"></p>
+    </div>
 
-<br>
-
-<div id="simulation-root" class="hidden">
-    <div id="simulation-container"></div>
+    <div id="simulation-root" class="hidden">
+        <div id="simulation-container"></div>
+    </div>
 </div>
 
 <script src="lift.js"></script>
